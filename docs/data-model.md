@@ -84,3 +84,60 @@ CREATE TABLE note_tags (
     FOREIGN KEY (note_id) REFERENCES notes(note_id),
     FOREIGN KEY (tag_id) REFERENCES tags(tag_id)
 );
+
+## Example SQL Queries
+
+### 1. Get all notes for a user
+
+```sql
+SELECT note_id, title, body, created_at
+FROM notes
+WHERE user_id = 1
+ORDER BY created_at DESC;
+```
+
+### 2. Find notes containing a keyword
+
+```sql
+SELECT note_id, title, body
+FROM notes
+WHERE user_id = 1
+  AND (title LIKE '%project%' OR body LIKE '%project%');
+```
+
+### 3. Get notes together with their tags
+
+```sql
+SELECT
+    n.note_id,
+    n.title,
+    t.tag_id,
+    t.name AS tag_name
+FROM notes n
+JOIN note_tags nt ON n.note_id = nt.note_id
+JOIN tags t ON nt.tag_id = t.tag_id
+WHERE n.user_id = 1
+ORDER BY n.created_at DESC;
+```
+
+The third query uses JOINs to connect notes, the note_tags junction table, and tags.
+
+## Indexing
+
+An index should be created on the `notes.user_id` column because most note queries are performed for a specific authenticated user. The index helps the database find that user's notes faster without scanning the entire notes table.
+
+```sql
+CREATE INDEX idx_notes_user_id
+ON notes(user_id);
+```
+
+An additional index can support searches by creation date:
+
+```sql
+CREATE INDEX idx_notes_user_created
+ON notes(user_id, created_at);
+```
+
+## SQL vs NoSQL Decision
+
+QuickNotes should use a SQL relational database such as PostgreSQL. The system has clear relationships between users, notes, tags, and the note_tags junction table. SQL provides foreign keys, constraints, transactions, and JOINs that help maintain data integrity. A relational database is therefore a good fit for the structured data and many-to-many relationships in QuickNotes. It can also scale through indexing, read replicas, caching, and other architectural techniques.
