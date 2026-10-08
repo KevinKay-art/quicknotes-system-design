@@ -20,6 +20,8 @@ async function request(url, options = {}) {
 
 function displayNote(note, addToTop = false) {
     const listItem = document.createElement("li");
+    listItem.className = "note";
+
     const title = document.createElement("h2");
     const body = document.createElement("p");
     const deleteButton = document.createElement("button");
@@ -56,12 +58,12 @@ async function deleteNote(id, listItem, deleteButton) {
         if (response.ok) {
             listItem.remove();
             status.textContent = `Note deleted (status ${response.status}).`;
-            status.className = "success";
+            status.className = "status-success";
         }
     } catch (error) {
         deleteButton.disabled = false;
         status.textContent = "Sorry, we could not delete the note. Please try again.";
-        status.className = "error";
+        status.className = "status-error";
     } finally {
         deleteButton.disabled = false;
     }
@@ -87,8 +89,10 @@ async function loadNotes() {
         notes.forEach((note) => displayNote(note));
 
         status.textContent = `Loaded ${notes.length} notes from the server.`;
+        status.className = "status-success";
     } catch (error) {
         status.textContent = "Sorry, we could not load the notes. Please try again.";
+        status.className = "status-error";
     } finally {
         loadButton.disabled = false;
     }
@@ -102,13 +106,13 @@ async function createNote(event) {
 
     if (!title) {
         status.textContent = "Please enter a title.";
-        status.className = "error";
+        status.className = "status-error";
         return;
     }
 
     if (title.length > 100) {
         status.textContent = "Title must be 100 characters or fewer.";
-        status.className = "error";
+        status.className = "status-error";
         return;
     }
 
@@ -134,12 +138,12 @@ async function createNote(event) {
         displayNote(newNote, true);
 
         status.textContent = `Note created (status ${response.status}, id ${newNote.id}).`;
-        status.className = "success";
+        status.className = "status-success";
 
         noteForm.reset();
     } catch (error) {
         status.textContent = "Sorry, we could not create the note. Please try again.";
-        status.className = "error";
+        status.className = "staus-error";
     } finally {
         submitButton.disabled = false;
     }
