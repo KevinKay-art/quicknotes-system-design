@@ -22,16 +22,48 @@ function displayNote(note, addToTop = false) {
     const listItem = document.createElement("li");
     const title = document.createElement("h2");
     const body = document.createElement("p");
+    const deleteButton = document.createElement("button");
 
     title.textContent = note.title;
     body.textContent = note.body;
 
-    listItem.append(title, body);
+    deleteButton.textContent = "Delete";
+    deleteButton.type = "button";
+
+    deleteButton.addEventListener("click", () => deleteNote(note.id, listItem, deleteButton));
+
+    listItem.append(title, body, deleteButton);
 
     if (addToTop) {
         notesList.prepend(listItem);
     } else {
         notesList.appendChild(listItem);
+    }
+}
+
+async function deleteNote(id, listItem, deleteButton) {
+    deleteButton.disabled = true;
+    status.textContent = "Deleting note...";
+    status.className = "";
+
+    try {
+        // JSONPlaceholder accepts DELETE requests but does not permanently store changes.
+        // We remove the note from our page to reflect the successful DELETE response.
+        const response = await request(`${API_URL}/${id}`, {
+            method: "DELETE"
+        });
+
+        if (response.ok) {
+            listItem.remove();
+            status.textContent = `Note deleted (status ${response.status}).`;
+            status.className = "success";
+        }
+    } catch (error) {
+        deleteButton.disabled = false;
+        status.textContent = "Sorry, we could not delete the note. Please try again.";
+        status.className = "error";
+    } finally {
+        deleteButton.disabled = false;
     }
 }
 
